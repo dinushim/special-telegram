@@ -134,7 +134,7 @@ assoc2-R zero (suc y) (suc z) = refl
 assoc2-R (suc x) zero zero rewrite zero-idL x = cong suc (zero-idR x)
 assoc2-R (suc x) zero (suc z) = cong suc (zero-inside x (suc z))
 assoc2-R (suc x) (suc y) zero rewrite zero-idL y = cong suc (zero-idR (x + suc y))
-assoc2-R (suc x) (suc y) (suc z) = {!!} --cong suc (cong-add {!x!} {!y + suc z!} {! suc y + suc z!} {!assoc-helper y z !})
+assoc2-R (suc x) (suc y) (suc z) = cong suc (assoc2-R x (suc y) (suc z))
 
 helperception : (x y z : ℕ) → (L : List ℕ) → x + (y + fold2 _+_ 0 L + suc z) ≡
       x + (y + fold2 _+_ 0 L) + suc z
@@ -163,12 +163,17 @@ length2 : (L : List ℕ) → ℕ
 length2 L = suc (mylength L) 
 
 want-helper : (x : ℕ) → (L : List ℕ)
-            → (g : Permutation (suc (mylength L) ) (suc (mylength L) ))
-            → apply (x ∷ L) g ≡
+            → let L' = x ∷ L in
+               (g : Permutation (mylength L') (mylength L'))
+            → apply L' g ≡
                     insert (Data.Fin.toℕ (f g Data.Fin.zero)) x
-                    (remove-and-shift (apply (x ∷ L) g)
+                    (remove-and-shift (apply L' g)
                     (Data.Fin.toℕ (f-inv g Data.Fin.zero))) 
-want-helper = {!!} 
+want-helper x [] g with f g Fin.zero | f-inv g Fin.zero
+... | Fin.zero | Fin.zero = refl
+... | Fin.zero | Fin.suc ()
+... | Fin.suc () | _
+want-helper x (y ∷ L) g = {!!} 
 
 {-want-helper : (x : List ℕ) → (g : Permutation (mylength x) (mylength x))
               → (apply x g) ≡
