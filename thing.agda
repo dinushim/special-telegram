@@ -7,7 +7,7 @@ open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Data.Nat
-open import Data.Fin using (Fin)
+open import Data.Fin hiding (_+_)
 open import Data.Vec using (toList; fromList; tabulate; lookup)
 open import Data.Maybe
 
@@ -63,16 +63,16 @@ want : (x : List ℕ) → (g : Permutation (mylength x) (mylength x)) → fold-s
 want [] g = refl
 want (x ∷ x₁) g = {!!}
 
-insert : (pos elt : ℕ) → (L : List ℕ) → List ℕ
-insert _ elt [] = elt ∷ []
+insert : (pos elt : ℕ) → (L : List ℕ) → List ℕ -- any position beyond list length just means tack on end because whatever just don't forget
+insert pos elt [] = elt ∷ []
 insert zero elt (x ∷ L) = elt ∷ x ∷ L
-insert (suc pos) elt (x ∷ L) = x ∷ insert pos elt L
+insert (suc pos) elt (x ∷ L) = insert pos elt L
 
 zero-idL : (x : ℕ) → x + 0 ≡ x
 zero-idL zero = refl
 zero-idL (suc x) rewrite zero-idL x = refl
 
-fold-zero : (L : List ℕ) → fold-sum (zero ∷ L) ≡ fold-sum L
+fold-zero : (L : List ℕ) → fold-sum (zero ∷ L) ≡ fold-sum L 
 fold-zero L = refl
 
 zero-idR : (x : ℕ) → x ≡ x + 0
@@ -81,34 +81,39 @@ zero-idR (suc x) = cong suc (zero-idR x)
 
 obvious : (x : ℕ) → (L : List ℕ) → x ∷ L ≡ insert 0 x L
 obvious x [] = refl
-obvious x (x₁ ∷ L) = refl
-
-shift-suc : (x y : ℕ) → suc (x + y) ≡ x + suc y
-shift-suc zero y = refl
-shift-suc (suc x) y = cong suc (shift-suc x y)
+obvious x (x₁ ∷ L) = refl 
 
 add-comm : (x y : ℕ) → x + y ≡ y + x
 add-comm zero zero = refl
 add-comm zero (suc y) = cong suc (zero-idR y)
-add-comm (suc x) y = trans (cong suc (add-comm x y)) (shift-suc y x)
+add-comm (suc x) zero = cong suc (zero-idL x)
+add-comm (suc x) (suc y) = cong suc {!!} --???
 
-insert-sum : (pos elt : ℕ) → (L : List ℕ) → fold-sum (insert pos elt L) ≡ fold-sum L + elt
-insert-sum pos elt [] = zero-idL elt
-insert-sum zero elt (x ∷ L) = add-comm elt (x + fold2 _+_ zero L)
-insert-sum (suc pos) elt (x ∷ L) =
-  trans (cong (λ z → x + z) (insert-sum pos elt L)) {!!} -- by associativity
+insert-sum : (pos elt : ℕ) → (L : List ℕ) → fold-sum (insert pos elt L) ≡ fold-sum L + elt  
+insert-sum pos zero [] = refl
+insert-sum zero zero (x ∷ L) = zero-idR (x + fold2 _+_ zero L)
+insert-sum pos (suc elt) [] = zero-idL (suc elt)
+insert-sum zero (suc elt) (x ∷ L) = add-comm (suc elt) (x + fold2 _+_ zero L)
+insert-sum (suc pos) zero (x ∷ L) = {!!}
+insert-sum (suc pos) (suc elt) (x ∷ L) = {!!}
 
--- No, this is very bad.  Instead, create a list with known head (for want-helper).
 head : (L : List ℕ) → ℕ  --not entirely accurate but should be okay? be careful (Maybe/just makes issues?)
 head [] = 0
 head (x ∷ L) = x
 
-remove-and-shift : (x : List ℕ) → (a b : ℕ) → List ℕ
-remove-and-shift = {!!}
+remove-and-shift : (x : List ℕ) → (a : ℕ) → List ℕ  
+remove-and-shift [] a = []
+remove-and-shift (x ∷ x₁) zero = x₁
+remove-and-shift (x ∷ x₁) (suc a) = remove-and-shift x₁ a
 
-want-helper : (x : List ℕ) → (g : Permutation (mylength x) (mylength x)) → (apply x g) ≡ insert {! f 0!} (head x) (remove-and-shift {!!} {!!} {!!})
+
+
+want-helper : (x : List ℕ) → (g : Permutation (mylength x) (mylength x))
+              → (apply x g) ≡
+                       insert (toℕ (f g {!Data.Fin.zero!})) (head x)
+                       (remove-and-shift (apply x g) (toℕ (f-inv g {!Data.Fin.zero!}))) 
 want-helper [] (perm f f-inv left right) = {!!}
-want-helper (x ∷ x₁) (perm f f-inv left right) = {!!}
+want-helper (x ∷ x₁) (perm f f-inv left right) = {!!} 
 
 
 {-
@@ -133,7 +138,7 @@ counterlemma (x ∷ x₁) = {!!}
 obtaining a list of one element shorter from a permutation of Sn+1 by fixing the first element:
 
 [a b c] -> [b c a] i.e. (132)
-need to obtain permutation on two elements by fixing first
+need to obtain permutation on two elements by fixing first 
 
 
 
