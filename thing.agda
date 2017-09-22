@@ -154,10 +154,17 @@ insert-sum zero elt (x ∷ L) = add-comm elt (x + fold2 _+_ zero L)
 insert-sum (suc pos) elt (x ∷ L) =
   trans (cong (λ z → x + z) (insert-sum pos elt L)) (insert-sum-helper x elt L)
 
-remove-and-shift : (x : List ℕ) → (a : ℕ) → List ℕ
+remove-and-shift : (x : List ℕ) → (a : ℕ) → List ℕ --- needs to be redone, or a modified apply function needs to be written
 remove-and-shift [] a = []
 remove-and-shift (x ∷ x₁) zero = x₁
 remove-and-shift (x ∷ x₁) (suc a) = remove-and-shift x₁ a
+
+{-
+consider [1,2,3,4,5] and [4,2,3,1,5]. we should be insering 1 into position 3 to the list that results from applying the same permutation to the list obtained by deleting 
+the one. however, this would put 2 in position zero, which means that 2 will then get shifted to position 3
+
+this should give [3,4,2,5] into which we insert 1 into position 3, giving [3,4,2,1,5], which is not what we wanted (but I don't quite know how to write this in agda)
+-}
 
 length2 : (L : List ℕ) → ℕ
 length2 L = suc (mylength L)
@@ -175,8 +182,8 @@ want-helper x [] g with f g Fin.zero | f-inv g Fin.zero
 ... | Fin.suc () | _
 want-helper x (y ∷ L) g with f g Fin.zero | f-inv g Fin.zero
 ... | Fin.zero | Fin.zero = refl
-... | Fin.zero | Fin.suc m = {!!}
-... | Fin.suc n | Fin.zero = {!!}
+... | Fin.zero | Fin.suc m = {!!} --- if f(0) = 0, f-inv(0) should be zero
+... | Fin.suc n | Fin.zero = {!!} -- if f-inv(0) = 0, f(0) should be zero, not suc (a)
 ... | Fin.suc n | Fin.suc m = {!!}
 
 {-want-helper : (x : List ℕ) → (g : Permutation (mylength x) (mylength x))
