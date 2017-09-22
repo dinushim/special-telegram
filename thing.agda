@@ -96,7 +96,7 @@ assoc-helper : (y z : ℕ) → suc (y + suc z) ≡ suc y + suc z
 assoc-helper = λ y z → refl
 
 assoc-helper-R : (y z : ℕ) → suc y + suc z ≡ suc (y + suc z)
-assoc-helper-R = λ y z → refl 
+assoc-helper-R = λ y z → refl
 
 assoc : (x y z : ℕ) → (x + y) + z ≡ x + (y + z)
 assoc zero y z = refl
@@ -107,7 +107,7 @@ assoc (suc x) (suc y) (suc z) rewrite assoc-helper y z = cong suc (assoc x (suc 
 
 cong-add : (x y z : ℕ) → y ≡ z → x + y ≡ x + z
 cong-add zero zero zero = λ _ → refl
-cong-add zero y z = λ z₁ → z₁ 
+cong-add zero y z = λ z₁ → z₁
 cong-add (suc x) zero zero = λ _ → refl
 cong-add (suc x) zero (suc z) = λ ()
 cong-add (suc x) (suc y) zero = λ ()
@@ -117,7 +117,7 @@ assoc2 : (x y z : ℕ) → x + y + z ≡ x + (y + z)
 assoc2 zero y z = refl
 assoc2 (suc x) zero zero = cong suc (zero-idL (x + zero))
 assoc2 (suc x) zero (suc z) rewrite zero-idL x = refl
-assoc2 (suc x) (suc y) zero rewrite zero-idL y = cong suc (zero-idL (x + suc y)) 
+assoc2 (suc x) (suc y) zero rewrite zero-idL y = cong suc (zero-idL (x + suc y))
 assoc2 (suc x) (suc y) (suc z) rewrite assoc-helper-R y z = cong suc (assoc2 x (suc y) (suc z))
 
 zero-inside : (x y : ℕ) → x + y ≡ x + 0 + y
@@ -139,7 +139,7 @@ assoc2-R (suc x) (suc y) (suc z) = cong suc (assoc2-R x (suc y) (suc z))
 helperception : (x y z : ℕ) → (L : List ℕ) → x + (y + fold2 _+_ 0 L + suc z) ≡
       x + (y + fold2 _+_ 0 L) + suc z
 helperception zero y z L = refl
-helperception (suc x) y z L = cong suc (helperception x y z L) 
+helperception (suc x) y z L = cong suc (helperception x y z L)
 
 insert-sum-helper : (x elt : ℕ) → (L : List ℕ) → x + (fold-sum L + elt) ≡ fold-sum (x ∷ L) + elt
 insert-sum-helper zero elt L = refl
@@ -154,13 +154,13 @@ insert-sum zero elt (x ∷ L) = add-comm elt (x + fold2 _+_ zero L)
 insert-sum (suc pos) elt (x ∷ L) =
   trans (cong (λ z → x + z) (insert-sum pos elt L)) (insert-sum-helper x elt L)
 
-remove-and-shift : (x : List ℕ) → (a : ℕ) → List ℕ  
+remove-and-shift : (x : List ℕ) → (a : ℕ) → List ℕ
 remove-and-shift [] a = []
 remove-and-shift (x ∷ x₁) zero = x₁
 remove-and-shift (x ∷ x₁) (suc a) = remove-and-shift x₁ a
 
 length2 : (L : List ℕ) → ℕ
-length2 L = suc (mylength L) 
+length2 L = suc (mylength L)
 
 want-helper : (x : ℕ) → (L : List ℕ)
             → let L' = x ∷ L in
@@ -168,19 +168,23 @@ want-helper : (x : ℕ) → (L : List ℕ)
             → apply L' g ≡
                     insert (Data.Fin.toℕ (f g Data.Fin.zero)) x
                     (remove-and-shift (apply L' g)
-                    (Data.Fin.toℕ (f-inv g Data.Fin.zero))) 
+                    (Data.Fin.toℕ (f-inv g Data.Fin.zero)))
 want-helper x [] g with f g Fin.zero | f-inv g Fin.zero
 ... | Fin.zero | Fin.zero = refl
 ... | Fin.zero | Fin.suc ()
 ... | Fin.suc () | _
-want-helper x (y ∷ L) g = {!!} 
+want-helper x (y ∷ L) g with f g Fin.zero | f-inv g Fin.zero
+... | Fin.zero | Fin.zero = refl
+... | Fin.zero | Fin.suc m = {!!}
+... | Fin.suc n | Fin.zero = {!!}
+... | Fin.suc n | Fin.suc m = {!!}
 
 {-want-helper : (x : List ℕ) → (g : Permutation (mylength x) (mylength x))
               → (apply x g) ≡
                        insert (Data.Fin.toℕ (f g {!Data.Fin.zero!})) (head x)
-                       (remove-and-shift (apply x g) (Data.Fin.toℕ (f-inv g {!Data.Fin.zero!}))) 
+                       (remove-and-shift (apply x g) (Data.Fin.toℕ (f-inv g {!Data.Fin.zero!})))
 want-helper [] (perm f f-inv left right) = {!!}
-want-helper (x ∷ x₁) (perm f f-inv left right) = {!!} 
+want-helper (x ∷ x₁) (perm f f-inv left right) = {!!}
 
 -}
 {-
@@ -205,7 +209,7 @@ counterlemma (x ∷ x₁) = {!!}
 obtaining a list of one element shorter from a permutation of Sn+1 by fixing the first element:
 
 [a b c] -> [b c a] i.e. (132)
-need to obtain permutation on two elements by fixing first 
+need to obtain permutation on two elements by fixing first
 
 
 
