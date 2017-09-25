@@ -161,12 +161,21 @@ remove-and-shift (x ∷ x₁) (suc a) = remove-and-shift x₁ a
 
 
 
-adjust : {n : ℕ} → (h : Fin (suc n) → Fin (suc n)) → Fin n → Fin n
-adjust h x  with h Fin.zero | {!!} _≤?_ {!!} --????????
-... | a | b = {! !} 
+adjust : {n : ℕ} → (h : Fin (suc n) → Fin (suc n)) → Fin (suc n) → Fin n
+adjust h x  with h Fin.zero | ({!Data.Fin.toℕ (h Fin.zero)!} _≤?_ {!data.Fin.toℕ (h x)!}) --????????
+... | a | b = {! !}
+
+collapse : {n : ℕ} → Fin (suc n) → Fin n
+collapse Fin.zero = {!!}
+collapse (Fin.suc x) = {!!} 
+
+test : {n : ℕ} →  (h : Fin (suc n) → Fin (suc n)) → (Fin (suc n)) → Fin n
+test h x with (h x )
+test h x | Fin.zero = {!!}
+test h x | Fin.suc a = {!!} 
 
 perm-adjust : {n : ℕ} →  (g : Permutation (suc n) (suc n)) → (Permutation n n)
-perm-adjust (perm f f-inv left right) = perm (adjust f) {!!} {!!} {!!} 
+perm-adjust (perm f f-inv left right) = perm {!!} {!!} {!!} {!!} 
 
 
 {-
