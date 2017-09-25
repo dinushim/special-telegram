@@ -159,7 +159,19 @@ remove-and-shift [] a = []
 remove-and-shift (x ∷ x₁) zero = x₁
 remove-and-shift (x ∷ x₁) (suc a) = remove-and-shift x₁ a
 
+
+
+adjust : {n : ℕ} → (h : Fin (suc n) → Fin (suc n)) → Fin n → Fin n
+adjust h x  with h Fin.zero | {!!} _≤?_ {!!} --????????
+... | a | b = {! !} 
+
+perm-adjust : {n : ℕ} →  (g : Permutation (suc n) (suc n)) → (Permutation n n)
+perm-adjust (perm f f-inv left right) = perm (adjust f) {!!} {!!} {!!} 
+
+
 {-
+
+with f g Fin.zero | f-inv g Fin.zero
 consider [1,2,3,4,5] and [4,2,3,1,5]. we should be insering 1 into position 3 to the list that results from applying the same permutation to the list obtained by deleting 
 the one. however, this would put 2 in position zero, which means that 2 will then get shifted to position 3
 
