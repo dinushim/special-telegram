@@ -169,7 +169,7 @@ reduce {suc n} (Fin.suc x) (Fin.suc y) = Fin.suc (reduce x y) -- put back all bu
 augment : {n : ℕ} → Fin n → Fin (suc n) → Fin (suc n)
 augment {zero} () _
 augment {suc m} Fin.zero y = Fin.zero
-augment {suc m} z@(Fin.suc x) Fin.zero = raise 1 z
+augment {suc m} (Fin.suc x) Fin.zero = raise 1 (Fin.suc x)
 augment {suc m} (Fin.suc x) (Fin.suc y) = raise 1 (augment x y)
 
 -- adjust h y creates a new function h' where the value at y is removed.
