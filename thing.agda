@@ -7,7 +7,7 @@ open import Level renaming (zero to lzero; suc to lsuc)
 open import Relation.Nullary
 open import Relation.Nullary.Decidable
 open import Data.Nat
-open import Data.Fin using (Fin)
+open import Data.Fin using (Fin; raise)
 open import Data.Vec using (toList; fromList; tabulate; lookup)
 open import Data.Maybe
 
@@ -154,34 +154,45 @@ insert-sum zero elt (x ∷ L) = add-comm elt (x + fold2 _+_ zero L)
 insert-sum (suc pos) elt (x ∷ L) =
   trans (cong (λ z → x + z) (insert-sum pos elt L)) (insert-sum-helper x elt L)
 
-remove-and-shift : (x : List ℕ) → (a : ℕ) → List ℕ --- needs to be redone, or a modified apply function needs to be written
-remove-and-shift [] a = []
-remove-and-shift (x ∷ x₁) zero = x₁
-remove-and-shift (x ∷ x₁) (suc a) = remove-and-shift x₁ a
+-- given x : Fin (suc n) and y : Fin n, return Fin n
+--      x      when x <= y
+--      pred x when x > y (which necessarily means x ~ suc x')
+reduce : {n : ℕ} → Fin (suc n) → Fin (suc n) → Fin n
+reduce {zero} _ _ = {!!}
+reduce {suc _} Fin.zero _ = Fin.zero
+reduce {suc n} (Fin.suc x) Fin.zero = x
+reduce {suc n} (Fin.suc x) (Fin.suc y) = Fin.suc (reduce x y) -- put back all but 1 suc
 
+-- given x : Fin n and y : Fin n, return Fin (suc n)
+--     x     when x <= y
+--     suc x when x > y
+augment : {n : ℕ} → Fin n → Fin (suc n) → Fin (suc n)
+augment {zero} () _
+augment {suc m} Fin.zero y = Fin.zero
+augment {suc m} z@(Fin.suc x) Fin.zero = raise 1 z
+augment {suc m} (Fin.suc x) (Fin.suc y) = raise 1 (augment x y)
 
-
-adjust : {n : ℕ} → (h : Fin (suc n) → Fin (suc n)) → Fin (suc n) → Fin n
-adjust h x  with h Fin.zero | ({!Data.Fin.toℕ (h Fin.zero)!} _≤?_ {!data.Fin.toℕ (h x)!}) --????????
-... | a | b = {! !}
-
-collapse : {n : ℕ} → Fin (suc n) → Fin n
-collapse Fin.zero = {!!}
-collapse (Fin.suc x) = {!!} 
+-- adjust h y creates a new function h' where the value at y is removed.
+-- values that came 'before' are not touched, those after are shifted down.
+-- this happens both in the source and target.
+adjust : {n : ℕ} → (h : Fin (suc n) → Fin (suc n)) → Fin (suc n) → Fin n → Fin n
+adjust {n} h y m with h y
+adjust {zero} _ _ () | _
+adjust {suc _} h y m | hy = reduce (h (augment m y)) {!!}
 
 test : {n : ℕ} →  (h : Fin (suc n) → Fin (suc n)) → (Fin (suc n)) → Fin n
 test h x with (h x )
 test h x | Fin.zero = {!!}
-test h x | Fin.suc a = {!!} 
+test h x | Fin.suc a = {!!}
 
 perm-adjust : {n : ℕ} →  (g : Permutation (suc n) (suc n)) → (Permutation n n)
-perm-adjust (perm f f-inv left right) = perm {!!} {!!} {!!} {!!} 
+perm-adjust (perm f f-inv left right) = perm {!!} {!!} {!!} {!!}
 
 
 {-
 
 with f g Fin.zero | f-inv g Fin.zero
-consider [1,2,3,4,5] and [4,2,3,1,5]. we should be insering 1 into position 3 to the list that results from applying the same permutation to the list obtained by deleting 
+consider [1,2,3,4,5] and [4,2,3,1,5]. we should be insering 1 into position 3 to the list that results from applying the same permutation to the list obtained by deleting
 the one. however, this would put 2 in position zero, which means that 2 will then get shifted to position 3
 
 this should give [3,4,2,5] into which we insert 1 into position 3, giving [3,4,2,1,5], which is not what we wanted (but I don't quite know how to write this in agda)
@@ -189,7 +200,7 @@ this should give [3,4,2,5] into which we insert 1 into position 3, giving [3,4,2
 
 length2 : (L : List ℕ) → ℕ
 length2 L = suc (mylength L)
-
+{-
 want-helper : (x : ℕ) → (L : List ℕ)
             → let L' = x ∷ L in
                (g : Permutation (mylength L') (mylength L'))
@@ -206,7 +217,7 @@ want-helper x (y ∷ L) g with f g Fin.zero | f-inv g Fin.zero
 ... | Fin.zero | Fin.suc m = {!!} --- if f(0) = 0, f-inv(0) should be zero
 ... | Fin.suc n | Fin.zero = {!!} -- if f-inv(0) = 0, f(0) should be zero, not suc (a)
 ... | Fin.suc n | Fin.suc m = {!!}
-
+-}
 {-want-helper : (x : List ℕ) → (g : Permutation (mylength x) (mylength x))
               → (apply x g) ≡
                        insert (Data.Fin.toℕ (f g {!Data.Fin.zero!})) (head x)
