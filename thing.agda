@@ -154,39 +154,52 @@ insert-sum zero elt (x ∷ L) = add-comm elt (x + fold2 _+_ zero L)
 insert-sum (suc pos) elt (x ∷ L) =
   trans (cong (λ z → x + z) (insert-sum pos elt L)) (insert-sum-helper x elt L)
 
--- given x : Fin (suc n) and y : Fin n, return Fin n
+-- given x : Fin (suc (suc n)) and y : Fin (suc (suc n)), return Fin (suc n)
 --      x      when x <= y
 --      pred x when x > y (which necessarily means x ~ suc x')
-reduce : {n : ℕ} → Fin (suc n) → Fin (suc n) → Fin n
-reduce {zero} _ _ = {!!}
+reduce : {n : ℕ} → Fin (suc (suc n)) → Fin (suc (suc n)) → Fin (suc n)
+reduce {zero} _ _ = Fin.zero
 reduce {suc _} Fin.zero _ = Fin.zero
 reduce {suc n} (Fin.suc x) Fin.zero = x
 reduce {suc n} (Fin.suc x) (Fin.suc y) = Fin.suc (reduce x y) -- put back all but 1 suc
 
--- given x : Fin n and y : Fin n, return Fin (suc n)
---     x     when x <= y
---     suc x when x > y
-augment : {n : ℕ} → Fin n → Fin (suc n) → Fin (suc n)
-augment {zero} () _
-augment {suc m} Fin.zero y = Fin.zero
-augment {suc m} (Fin.suc x) Fin.zero = raise 1 (Fin.suc x)
-augment {suc m} (Fin.suc x) (Fin.suc y) = raise 1 (augment x y)
+-- given x : Fin n and y : Fin (suc n), return Fin (suc n)
+skip : {n : ℕ} → Fin (suc n) → Fin n → Fin (suc n)
+skip {zero} _ ()
+skip {suc _} y            Fin.zero   = Fin.zero
+skip {suc _} Fin.zero    (Fin.suc x) = raise 1 (Fin.suc x)
+skip {suc _} (Fin.suc y) (Fin.suc x) = raise 1 (skip y x)
 
--- adjust h y creates a new function h' where the value at y is removed.
--- values that came 'before' are not touched, those after are shifted down.
--- this happens both in the source and target.
+-- let h : Fin (suc n) -> Fin (suc n) and y : Fin (suc n).
+-- We want to create h' : Fin n -> Fin n which 'skips over' y.
+-- so we need a helper function
+-- skip : Fin (suc n) -> Fin n -> Fin (suc n)
+-- which given y (to skip over), x (to look up), where to look it up.
+-- Call this location z.
+-- Once we've gotten a value, hz : Fin (suc n), we need to know
+-- how to make it into a Fin n.  We first need hy = h y, as this
+-- is the value (from Fin (suc n)) that we want to remove from
+-- the range.  But I get stuck here, because I write down a
+-- signature Fin (Suc n) -> Fin (suc n) -> Fin n, and that's
+-- just never going to work [pick n=0 to see why]. But we never
+-- need it in that case!  We only even need it when n = suc n'.
+--
 adjust : {n : ℕ} → (h : Fin (suc n) → Fin (suc n)) → Fin (suc n) → Fin n → Fin n
-adjust {n} h y m with h y
+adjust {n} h y x with h y
 adjust {zero} _ _ () | _
-adjust {suc _} h y m | hy = reduce (h (augment m y)) {!!}
+adjust {suc _} h y x | hy = reduce (h (skip y x)) hy
 
-test : {n : ℕ} →  (h : Fin (suc n) → Fin (suc n)) → (Fin (suc n)) → Fin n
-test h x with (h x )
-test h x | Fin.zero = {!!}
-test h x | Fin.suc a = {!!}
+-- swap
+test-h : Fin 2 → Fin 2
+test-h Fin.zero = Fin.suc Fin.zero
+test-h (Fin.suc Fin.zero) = Fin.zero
+test-h (Fin.suc (Fin.suc ()))
+
+reduced-h : Fin 1 → Fin 1
+reduced-h = adjust test-h (Fin.zero)
 
 perm-adjust : {n : ℕ} →  (g : Permutation (suc n) (suc n)) → (Permutation n n)
-perm-adjust (perm f f-inv left right) = perm {!!} {!!} {!!} {!!}
+perm-adjust (perm f f-inv left right) = perm (adjust f (Fin.zero)) (adjust f-inv (f Fin.zero)) {!!} {!!}
 
 
 {-
